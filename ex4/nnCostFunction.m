@@ -8,8 +8,8 @@ function [J grad] = nnCostFunction(nn_params, ...
 %   [J grad] = NNCOSTFUNCTON(nn_params, hidden_layer_size, num_labels, ...
 %   X, y, lambda) computes the cost and gradient of the neural network. The
 %   parameters for the neural network are "unrolled" into the vector
-%   nn_params and need to be converted back into the weight matrices. 
-% 
+%   nn_params and need to be converted back into the weight matrices.
+%
 %   The returned parameter grad should be a "unrolled" vector of the
 %   partial derivatives of the neural network.
 %
@@ -24,8 +24,8 @@ Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):en
 
 % Setup some useful variables
 m = size(X, 1);
-         
-% You need to return the following variables correctly 
+
+% You need to return the following variables correctly
 J = 0;
 Theta1_grad = zeros(size(Theta1));
 Theta2_grad = zeros(size(Theta2));
@@ -46,12 +46,12 @@ Theta2_grad = zeros(size(Theta2));
 %         that your implementation is correct by running checkNNGradients
 %
 %         Note: The vector y passed into the function is a vector of labels
-%               containing values from 1..K. You need to map this vector into a 
+%               containing values from 1..K. You need to map this vector into a
 %               binary vector of 1's and 0's to be used with the neural network
 %               cost function.
 %
 %         Hint: We recommend implementing backpropagation using a for-loop
-%               over the training examples if you are implementing it for the 
+%               over the training examples if you are implementing it for the
 %               first time.
 %
 % Part 3: Implement regularization with the cost function and gradients.
@@ -62,22 +62,29 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+% map y to 5000*10
+temp = zeros(m,num_labels);
+for j = 1:size(y,1)
+  temp(j,y(j)) = 1;
+endfor
+y = temp;
 
+% add bias to X
+X = [ones(m,1) X];
 
+% forward
+a2 = sigmoid(X * Theta1');
+a3 = sigmoid([ones(size(a2,1),1) a2] * Theta2');
 
+% compute J
+J = 1/m * sum(sum((-y).*log(a3) - (1-y).*log(1-a3)))+lambda/(2*m)*(sum(sum(Theta1(:,2:input_layer_size+1).^2)) + sum(sum(Theta2(:,2:hidden_layer_size+1).^2)));
 
-
-
-
-
-
-
-
-
-
-
-
-
+% backpropagation
+Error_3 = a3 - y;
+sigmoidgrad1 = sigmoidGradient(X * Theta1');
+Error_2 = Error_3 * Theta2  .* [ones(size(sigmoidgrad1,1),1) sigmoidgrad1];
+Theta1_grad =1/m * Error_2(:,2:end)' * X + lambda/m * [zeros(size(Theta1,1),1)  Theta1(:,2:end)];
+Theta2_grad =1/m * Error_3' * [ones(size(a2,1),1) a2] + lambda/m * [zeros(size(Theta2,1),1)  Theta2(:,2:end)];
 
 
 % -------------------------------------------------------------
