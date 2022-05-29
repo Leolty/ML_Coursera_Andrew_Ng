@@ -1,4 +1,4 @@
-# NN
+# Neural Network
 
 ## cost function
 
